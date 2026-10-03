@@ -10,36 +10,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 1. Checkout Repository Code
+      - name: 1. Checkout Code
         uses: actions/checkout@v4
 
       - name: 2. Set up Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 3. Set up Android SDK & Accept Licenses
-        uses: android-actions/setup-android@v3
+      - name: 3. Set up Android SDK
+        uses: android-actions/setup-android@v4
 
-      - name: 4. Ensure Executable Permissions & Build APK
+      - name: 4. Build APK
         run: |
-          # Automatically find where build.gradle lives in case of subfolder nesting
+          # Find directory containing build.gradle
           PROJECT_DIR=$(find . -maxdepth 3 -name "build.gradle" -not -path "*/app/*" -exec dirname {} \;)
           if [ -n "$PROJECT_DIR" ]; then
             cd "$PROJECT_DIR"
           fi
 
-          # Grant execution permissions to gradlew if present
+          # Grant execution permissions to gradlew
           if [ -f "./gradlew" ]; then
             chmod +x gradlew
-            ./gradlew assembleDebug --no-daemon --stacktrace
+            ./gradlew assembleDebug --no-daemon
           else
-            gradle assembleDebug --no-daemon --stacktrace
+            gradle assembleDebug --no-daemon
           fi
 
       - name: 5. Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: LegacyFitnessTracker-Debug-APK
+          name: app-debug
           path: '**/build/outputs/apk/debug/*.apk'
